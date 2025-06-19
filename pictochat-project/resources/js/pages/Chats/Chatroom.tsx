@@ -11,7 +11,8 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function Index() {
+export default function Chatroom() {
+    
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Chats" />

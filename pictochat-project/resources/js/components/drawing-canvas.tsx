@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
 
 export default function DrawingCanvas() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -41,13 +42,39 @@ export default function DrawingCanvas() {
         contextRef.current?.stroke();
     };
 
+    const postImage = async () => {
+        const canvas = canvasRef.current;
+        if (!canvas) {
+            return;
+        }
+
+        const dataURL = canvas.toDataURL('image/png');
+
+        await fetch('/api/save-drawing', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"') as HTMLMetaElement)?.content || '',
+            },
+            body: JSON.stringify({
+                image: dataURL,
+            }),
+        });
+    };
+
     return (
-        <canvas
-            ref={canvasRef}
-            onMouseDown={startDrawing}
-            onMouseUp={finishDrawing}
-            onMouseMove={draw}
-            onMouseLeave={finishDrawing}
-        />
+        <div>
+            <canvas
+                ref={canvasRef}
+                onMouseDown={startDrawing}
+                onMouseUp={finishDrawing}
+                onMouseMove={draw}
+                onMouseLeave={finishDrawing}
+            />
+            <div className="mt-4">
+                <Button onClick={postImage}>Send</Button>
+            </div>
+        </div>
+
     );
 }

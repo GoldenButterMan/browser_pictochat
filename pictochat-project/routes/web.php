@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\DrawingController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -14,6 +15,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
     Route::get('/chats', [ChatController::class, 'index'])->name('chats.index');
     Route::get('/chats/chatroom',[ChatController::class, 'chatroom'])->name('chats.chatroom');
+    Route::get('/api/save-drawing', [DrawingController::class, 'store']);
 });
 
 require __DIR__.'/settings.php';
