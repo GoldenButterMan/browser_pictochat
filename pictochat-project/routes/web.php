@@ -15,8 +15,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
     Route::get('/chats', [ChatController::class, 'index'])->name('chats.index');
     Route::get('/chats/chatroom',[ChatController::class, 'chatroom'])->name('chats.chatroom');
-    Route::get('/api/save-drawing', [DrawingController::class, 'store']);
 });
+
+Route::post('/save-drawing', [DrawingController::class, 'store'])->name('drawing.save');
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

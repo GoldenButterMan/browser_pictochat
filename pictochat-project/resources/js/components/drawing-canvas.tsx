@@ -50,14 +50,16 @@ export default function DrawingCanvas() {
 
         const dataURL = canvas.toDataURL('image/png');
 
-        await fetch('/api/save-drawing', {
+        await fetch('/save-drawing', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"') as HTMLMetaElement)?.content || '',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
             },
             body: JSON.stringify({
                 image: dataURL,
+                caption: 'User drawing',
+                chatroom_id: 'general'
             }),
         });
     };
