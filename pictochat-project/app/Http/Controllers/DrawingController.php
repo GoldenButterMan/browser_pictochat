@@ -4,34 +4,37 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Drawing;
 
 class DrawingController extends Controller
 {
-    public function store(Request $request){
+    public function store(Request $request) {
         $imageData = $request->input('image');
-        $caption = $request->input('caption'); //optional caption on the photo
-        $chatroomId = $request->input('chatroom_id'); //id of the chatroom
+        $caption = $request->input('caption');
+        $chatroomId = $request->input('chatroom_id');
 
-        //Convert from base64
-        [$type, $data] = explode(';', $imageData);
-        [, $data] = explode(',', $data);
-        $data = base64_decode($data);
+        if (!$imageData || !str_starts_with($imageData, 'data:image')) {
+            return response()->json(['error' => 'Invalid image data'], 400);
+        }
 
-        $filename = 'drawing_' . time() . '.png';
-        Storage::disk('public')->put("drawing/{$filename}", $data);
+        try {
+            [$meta, $base64data] = explode(',', $imageData, 2);
+            $decodedData = base64_decode($base64data);
 
-        //save drawing metadata to database
-        $drawing = Drawing::create([
-            'user_id' => Auth::id(),
-            'filename' => $filename,
-            'chatroom_id' => $chatroomId,
-            'caption' => $caption
-        ]);
+            $filename = 'drawing_' . time() . '.png';
+            Storage::disk('public')->put("drawing/{$filename}", $decodedData);
 
-        return response()->json([
-            'message' => 'Your drawing has been saved!',
-            'drawing' => $drawing,
-            'url' => Storage::url("drawings/{$filename}"),
-        ]);
+            $drawing = Drawing::create([
+                'user_id' => Auth::id(),
+                'filename' => $filename,
+                'chatroom_id' => $chatroomId,
+                'caption' => $caption,
+            ]);
+
+            return response()->json(['message' => 'Drawing saved', 'drawing' => $drawing]);
+        } catch (\Throwable $e) {
+            return response()->json(['error' => 'Image processing failed'], 500);
+        }
     }
 }

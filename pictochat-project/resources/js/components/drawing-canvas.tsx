@@ -1,10 +1,17 @@
 import { useRef, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
+import {useForm} from '@inertiajs/react';
 
 export default function DrawingCanvas() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const contextRef = useRef<CanvasRenderingContext2D | null>(null);
     const [isDrawing, setIsDrawing] = useState(false);
+
+    const {data, setData, post, processing, errors, reset} = useForm({
+        image: '',
+        caption: '',
+        chatroom_id: 'general',
+    })
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -42,27 +49,25 @@ export default function DrawingCanvas() {
         contextRef.current?.stroke();
     };
 
-    const postImage = async () => {
+    const handleSubmit = () => {
         const canvas = canvasRef.current;
-        if (!canvas) {
-            return;
-        }
+        if(!canvas) return;
 
         const dataURL = canvas.toDataURL('image/png');
+        setData('image', dataURL);
 
-        await fetch('/save-drawing', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+        post('/save-drawing', {
+            headers: {'X-Inertia': 'false'},
+            onSuccess: () => {
+                alert('Drawing submitted!');
+                reset(); //clear the form
+                contextRef.current?.clearRect(0, 0, canvas.width, canvas.height); //clear canvas
             },
-            body: JSON.stringify({
-                image: dataURL,
-                caption: 'User drawing',
-                chatroom_id: 'general'
-            }),
-        });
-    };
+            onError: () => {
+                alert('There was an error submitting the drawing');
+            },
+        })
+    }
 
     return (
         <div>
@@ -74,8 +79,10 @@ export default function DrawingCanvas() {
                 onMouseLeave={finishDrawing}
             />
             <div className="mt-4">
-                <Button onClick={postImage}>Send</Button>
+                <Button onClick={handleSubmit} disabled = {processing} type = 'submit'> {processing ? 'Sending...' : 'Send'}</Button>
             </div>
+            {errors.caption && <p className= "text-red-500">{errors.caption}</p>}
+            {errors.image && <p className="text-red-500">{errors.image}</p>}
         </div>
 
     );
