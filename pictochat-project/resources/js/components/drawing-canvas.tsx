@@ -54,16 +54,22 @@ export default function DrawingCanvas() {
         if(!canvas) return;
 
         const dataURL = canvas.toDataURL('image/png');
+        
+        if (!dataURL.startsWith('data:image')) {
+            alert('Canvas is empty or image data in invalid.');
+            return;
+        }
+
         setData('image', dataURL);
 
         post('/save-drawing', {
-            headers: {'X-Inertia': 'false'},
             onSuccess: () => {
                 alert('Drawing submitted!');
                 reset(); //clear the form
                 contextRef.current?.clearRect(0, 0, canvas.width, canvas.height); //clear canvas
             },
-            onError: () => {
+            onError: (err) => {
+                console.error(err);
                 alert('There was an error submitting the drawing');
             },
         })
@@ -79,7 +85,7 @@ export default function DrawingCanvas() {
                 onMouseLeave={finishDrawing}
             />
             <div className="mt-4">
-                <Button onClick={handleSubmit} disabled = {processing} type = 'submit'> {processing ? 'Sending...' : 'Send'}</Button>
+                <Button onClick={handleSubmit} disabled = {processing}> {processing ? 'Sending...' : 'Send'}</Button>
             </div>
             {errors.caption && <p className= "text-red-500">{errors.caption}</p>}
             {errors.image && <p className="text-red-500">{errors.image}</p>}

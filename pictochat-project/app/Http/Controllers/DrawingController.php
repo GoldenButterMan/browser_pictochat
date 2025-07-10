@@ -9,13 +9,16 @@ use App\Models\Drawing;
 
 class DrawingController extends Controller
 {
-    public function store(Request $request) {
+    public function store(Request $request)
+    {
         $imageData = $request->input('image');
         $caption = $request->input('caption');
         $chatroomId = $request->input('chatroom_id');
 
         if (!$imageData || !str_starts_with($imageData, 'data:image')) {
-            return response()->json(['error' => 'Invalid image data'], 400);
+            return redirect()->back()->withErrors([
+                'image' => 'Invalid image data',
+            ]);
         }
 
         try {
@@ -32,9 +35,11 @@ class DrawingController extends Controller
                 'caption' => $caption,
             ]);
 
-            return response()->json(['message' => 'Drawing saved', 'drawing' => $drawing]);
+            return redirect()->back()->with('success', 'Drawing saved!');
         } catch (\Throwable $e) {
-            return response()->json(['error' => 'Image processing failed'], 500);
+            return redirect()->back()->withErrors([
+                'image' => 'Failed to process drawing.',
+            ]);
         }
     }
 }
