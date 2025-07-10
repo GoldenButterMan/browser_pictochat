@@ -62,11 +62,11 @@ export default function DrawingCanvas() {
             return;
         }
 
-       // setData('image', dataURL);
+        setData('image', dataURL);
 
         setTimeout(() => {
             post('/save-drawing', {
-                
+
                 onSuccess: () => {
                     alert('Drawing submitted!');
                     reset(); //clear the form
