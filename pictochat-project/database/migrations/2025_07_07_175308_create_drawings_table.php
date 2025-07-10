@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('drawings', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('filename');
+            $table->longText('filename');
             $table->string('chatroom_id')->nullable();
             $table->timestamps();
         });

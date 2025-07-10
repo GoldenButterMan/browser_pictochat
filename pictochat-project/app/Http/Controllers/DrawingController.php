@@ -11,34 +11,47 @@ class DrawingController extends Controller
 {
     public function store(Request $request)
     {
-        $imageData = $request->input('image');
-        $caption = $request->input('caption');
-        $chatroomId = $request->input('chatroom_id');
 
-        if (!$imageData || !str_starts_with($imageData, 'data:image')) {
-            return redirect()->back()->withErrors([
-                'image' => 'Invalid image data',
-            ]);
-        }
+        $request->validate([
+            'image' => ['required', 'string', 'regex:/^data:image\/(png|jpeg|jpg);base64,/'],
+            'caption' => 'nullable|string',
+            'chatroom_id' => 'nullable|string',
+        ]);
 
         try {
-            [$meta, $base64data] = explode(',', $imageData, 2);
-            $decodedData = base64_decode($base64data);
+            $imageData = $request->input('image');
+            $caption = $request->input('caption');
+            $chatroomId = $request->input('chatroom_id');
 
-            $filename = 'drawing_' . time() . '.png';
+            // Separate metadata from base64 content
+            [$meta, $base64data] = explode(',', $imageData, 2);
+
+            // Determine file extension from MIME type
+            if (preg_match('/^data:image\/(\w+);base64$/', $meta, $matches)) {
+                $extension = $matches[1];
+            } else {
+                return back()->withErrors(['image' => 'Invalid image MIME type.']);
+            }
+
+            $decodedData = base64_decode($base64data);
+            if ($decodedData === false) {
+                return back()->withErrors(['image' => 'Failed to decode image data.']);
+            }
+
+            $filename = 'drawing_' . time() . '.' . $extension;
             Storage::disk('public')->put("drawing/{$filename}", $decodedData);
 
-            $drawing = Drawing::create([
+            Drawing::create([
                 'user_id' => Auth::id(),
                 'filename' => $filename,
-                'chatroom_id' => $chatroomId,
-                'caption' => $caption,
+                'caption' => $request->input('caption'),
+                'chatroom_id' => $request->input('chatroom_id'),
             ]);
 
-            return redirect()->back()->with('success', 'Drawing saved!');
+            return back()->with('success', 'Drawing saved!');
         } catch (\Throwable $e) {
-            return redirect()->back()->withErrors([
-                'image' => 'Failed to process drawing.',
+            return back()->withErrors([
+                'image' => 'Failed to process drawing: ' . $e->getMessage(),
             ]);
         }
     }
