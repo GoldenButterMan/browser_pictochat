@@ -8,7 +8,7 @@ class Drawing extends Model
 {
     protected $fillable = [
         'user_id',
-        'filename',
+        'image',
         'chatroom_id',
         'caption',
     ];

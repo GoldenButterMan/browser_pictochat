@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { useForm } from '@inertiajs/react';
+import { router, useForm } from '@inertiajs/react';
 
 export default function DrawingCanvas() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -10,7 +10,7 @@ export default function DrawingCanvas() {
     const { data, setData, post, processing, errors, reset } = useForm({
         image: '',
         caption: '',
-        chatroom_id: 'general',
+        chatroom_id: null,
     })
 
     useEffect(() => {
@@ -62,22 +62,22 @@ export default function DrawingCanvas() {
             return;
         }
 
-        setData('image', dataURL);
 
-        setTimeout(() => {
-            post('/save-drawing', {
-
-                onSuccess: () => {
-                    alert('Drawing submitted!');
-                    reset(); //clear the form
-                    contextRef.current?.clearRect(0, 0, canvas.width, canvas.height); //clear canvas
-                },
-                onError: (err) => {
-                    console.error(err);
-                    alert('There was an error submitting the drawing');
-                },
-            });
-        }, 0);
+        router.post('/save-drawing', {
+            image: dataURL,
+            caption: data.caption,
+            chatroom_id: data.chatroom_id,
+        }, {
+            onSuccess: () => {
+                alert('Drawing submitted!');
+                reset();
+                contextRef.current?.clearRect(0, 0, canvas.width, canvas.height);
+            },
+            onError: (err) => {
+                console.error(err);
+                alert('There was an error submitting drawing');
+            },
+        });
 
     }
 

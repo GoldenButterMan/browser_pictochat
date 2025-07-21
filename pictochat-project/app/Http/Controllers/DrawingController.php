@@ -15,7 +15,7 @@ class DrawingController extends Controller
         $request->validate([
             'image' => ['required', 'string', 'regex:/^data:image\/(png|jpeg|jpg);base64,/'],
             'caption' => 'nullable|string',
-            'chatroom_id' => 'nullable|string',
+            'chatroom_id' => 'nullable|integer',
         ]);
 
         try {
@@ -43,7 +43,7 @@ class DrawingController extends Controller
 
             Drawing::create([
                 'user_id' => Auth::id(),
-                'filename' => $filename,
+                'image' => $filename,
                 'caption' => $request->input('caption'),
                 'chatroom_id' => $request->input('chatroom_id'),
             ]);
