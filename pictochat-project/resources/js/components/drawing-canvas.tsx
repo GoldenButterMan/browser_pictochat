@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { router, useForm } from '@inertiajs/react';
 
 export default function DrawingCanvas() {
+    const [strokeColor, setStrokeColor] = useState<string>('black');
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const contextRef = useRef<CanvasRenderingContext2D | null>(null);
     const [isDrawing, setIsDrawing] = useState(false);
@@ -24,7 +25,7 @@ export default function DrawingCanvas() {
         const context = canvas.getContext('2d');
         if (context) {
             context.lineCap = 'round';
-            context.strokeStyle = 'black';
+            context.strokeStyle = strokeColor;
             context.lineWidth = 4;
             contextRef.current = context;
         }
@@ -48,20 +49,30 @@ export default function DrawingCanvas() {
         contextRef.current?.lineTo(offsetX, offsetY);
         contextRef.current?.stroke();
     };
+    //change color of brush stroke. Below useEffect refreshes canvas accordingly
+    const changeStrokeColor = (color:string) => {
+        setStrokeColor(color);
+        console.log(strokeColor);
+    };
+    
+    useEffect(() => {
+        if(contextRef.current){
+            contextRef.current.strokeStyle = strokeColor;
+        }
+    }, [strokeColor]);
 
     const handleSubmit = () => {
         const canvas = canvasRef.current;
         if (!canvas) return;
-
+        //Convert image to base64
         const dataURL = canvas.toDataURL('image/png');
 
         console.log('Submitting base64 image:', dataURL);
-
+        
         if (!dataURL.startsWith('data:image')) {
             alert('Canvas is empty or image data in invalid.');
             return;
         }
-
 
         router.post('/save-drawing', {
             image: dataURL,
@@ -90,6 +101,12 @@ export default function DrawingCanvas() {
                 onMouseMove={draw}
                 onMouseLeave={finishDrawing}
             />
+            {/*Choose color you want to draw in*/}
+            <span className = "flex gap-2 mt-4">
+                <Button onClick={() => changeStrokeColor('green')}>Green</Button>
+                <Button onClick={() => changeStrokeColor('red')}>Red</Button> 
+                <Button onClick={() => changeStrokeColor('blue')}>Blue</Button> 
+                <Button onClick={() => changeStrokeColor('black')}>Black</Button></span>
             <div className="mt-4">
                 <Button onClick={handleSubmit} disabled={processing}> {processing ? 'Sending...' : 'Send'}</Button>
             </div>
