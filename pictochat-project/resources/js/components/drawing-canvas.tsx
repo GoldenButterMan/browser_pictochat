@@ -7,6 +7,7 @@ export default function DrawingCanvas() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const contextRef = useRef<CanvasRenderingContext2D | null>(null);
     const [isDrawing, setIsDrawing] = useState(false);
+    const oldColor = useRef<string>('black');
 
     const { data, setData, post, processing, errors, reset } = useForm({
         image: '',
@@ -35,12 +36,29 @@ export default function DrawingCanvas() {
         const { offsetX, offsetY } = nativeEvent;
         contextRef.current?.beginPath();
         contextRef.current?.moveTo(offsetX, offsetY);
+
+        if (nativeEvent.button === 0) {
+            setStrokeColor(oldColor.current);
+        }
+        //Use eraser
+        else if (nativeEvent.button === 2) {
+            oldColor.current = strokeColor;
+            console.log(oldColor);
+            changeStrokeColor('white');
+            
+        }
+
         setIsDrawing(true);
+
     };
 
     const finishDrawing = () => {
         contextRef.current?.closePath();
         setIsDrawing(false);
+
+        if(strokeColor == 'white'){
+            setStrokeColor(oldColor.current);
+        }
     };
 
     const draw = ({ nativeEvent }: React.MouseEvent) => {
@@ -50,13 +68,13 @@ export default function DrawingCanvas() {
         contextRef.current?.stroke();
     };
     //change color of brush stroke. Below useEffect refreshes canvas accordingly
-    const changeStrokeColor = (color:string) => {
+    const changeStrokeColor = (color: string) => {
         setStrokeColor(color);
         console.log(strokeColor);
     };
-    
+
     useEffect(() => {
-        if(contextRef.current){
+        if (contextRef.current) {
             contextRef.current.strokeStyle = strokeColor;
         }
     }, [strokeColor]);
@@ -68,7 +86,7 @@ export default function DrawingCanvas() {
         const dataURL = canvas.toDataURL('image/png');
 
         console.log('Submitting base64 image:', dataURL);
-        
+
         if (!dataURL.startsWith('data:image')) {
             alert('Canvas is empty or image data in invalid.');
             return;
@@ -100,13 +118,14 @@ export default function DrawingCanvas() {
                 onMouseUp={finishDrawing}
                 onMouseMove={draw}
                 onMouseLeave={finishDrawing}
+                onContextMenu={(e) => e.preventDefault()}
             />
             {/*Choose color you want to draw in*/}
-            <span className = "flex gap-2 mt-4">
-                <Button onClick={() => changeStrokeColor('green')}>Green</Button>
-                <Button onClick={() => changeStrokeColor('red')}>Red</Button> 
-                <Button onClick={() => changeStrokeColor('blue')}>Blue</Button> 
-                <Button onClick={() => changeStrokeColor('black')}>Black</Button></span>
+            <span className="flex gap-2 mt-4">
+                <Button onClick={() => { changeStrokeColor('green'); oldColor.current = 'green' }}>Green</Button>
+                <Button onClick={() => { changeStrokeColor('red'); oldColor.current = 'red' }}>Red</Button>
+                <Button onClick={() => { changeStrokeColor('blue'); oldColor.current = 'blue' }}>Blue</Button>
+                <Button onClick={() => { changeStrokeColor('black'); oldColor.current = 'black' }}>Black</Button></span>
             <div className="mt-4">
                 <Button onClick={handleSubmit} disabled={processing}> {processing ? 'Sending...' : 'Send'}</Button>
             </div>
