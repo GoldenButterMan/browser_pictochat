@@ -37,6 +37,7 @@ export default function DrawingCanvas() {
         contextRef.current?.beginPath();
         contextRef.current?.moveTo(offsetX, offsetY);
 
+        //Drawing mode
         if (nativeEvent.button === 0) {
             setStrokeColor(oldColor.current);
         }
@@ -55,7 +56,7 @@ export default function DrawingCanvas() {
     const finishDrawing = () => {
         contextRef.current?.closePath();
         setIsDrawing(false);
-
+        //restore stroke color to previous color before erasing
         if(strokeColor == 'white'){
             setStrokeColor(oldColor.current);
         }
