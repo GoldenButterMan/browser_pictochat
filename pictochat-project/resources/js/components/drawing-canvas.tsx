@@ -46,7 +46,7 @@ export default function DrawingCanvas() {
             oldColor.current = strokeColor;
             console.log(oldColor);
             changeStrokeColor('white');
-            
+
         }
 
         setIsDrawing(true);
@@ -57,7 +57,7 @@ export default function DrawingCanvas() {
         contextRef.current?.closePath();
         setIsDrawing(false);
         //restore stroke color to previous color before erasing
-        if(strokeColor == 'white'){
+        if (strokeColor == 'white') {
             setStrokeColor(oldColor.current);
         }
     };
@@ -79,6 +79,12 @@ export default function DrawingCanvas() {
             contextRef.current.strokeStyle = strokeColor;
         }
     }, [strokeColor]);
+
+    const clearCanvas = () => {
+        const canvas = canvasRef.current;
+        reset();
+        contextRef.current?.clearRect(0, 0, canvas!.width, canvas!.height);
+    }
 
     const handleSubmit = () => {
         const canvas = canvasRef.current;
@@ -128,7 +134,10 @@ export default function DrawingCanvas() {
                 <Button onClick={() => { changeStrokeColor('blue'); oldColor.current = 'blue' }}>Blue</Button>
                 <Button onClick={() => { changeStrokeColor('black'); oldColor.current = 'black' }}>Black</Button></span>
             <div className="mt-4">
-                <Button onClick={handleSubmit} disabled={processing}> {processing ? 'Sending...' : 'Send'}</Button>
+                <span className="flex gap-2 mt-4">
+                    <Button onClick={handleSubmit} disabled={processing}> {processing ? 'Sending...' : 'Send'}</Button>
+                    <Button onClick={clearCanvas} disabled={processing}>Clear</Button>
+                </span>
             </div>
             {errors.caption && <p className="text-red-500">{errors.caption}</p>}
         </div>
