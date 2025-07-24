@@ -129,9 +129,9 @@ export default function DrawingCanvas() {
             />
             {/*Choose color you want to draw in*/}
             <span className="flex gap-2 mt-4">
-                <Button onClick={() => { changeStrokeColor('green'); oldColor.current = 'green' }}>Green</Button>
-                <Button onClick={() => { changeStrokeColor('red'); oldColor.current = 'red' }}>Red</Button>
-                <Button onClick={() => { changeStrokeColor('blue'); oldColor.current = 'blue' }}>Blue</Button>
+                <Button className = "bg-green-500" onClick={() => { changeStrokeColor('green'); oldColor.current = 'green' }}>Green</Button>
+                <Button className = "bg-red-500" onClick={() => { changeStrokeColor('red'); oldColor.current = 'red' }}>Red</Button>
+                <Button className = "bg-blue-500" onClick={() => { changeStrokeColor('blue'); oldColor.current = 'blue' }}>Blue</Button>
                 <Button onClick={() => { changeStrokeColor('black'); oldColor.current = 'black' }}>Black</Button></span>
             <div className="mt-4">
                 <span className="flex gap-2 mt-4">
