@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Drawing;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -12,6 +13,7 @@ class ChatController extends Controller
     }
 
     public function chatroom(){
-        return Inertia::render('Chats/Chatroom', []);
+        $drawings = Drawing::all();
+        return Inertia::render('Chats/Chatroom', compact('drawings'));
     }
 }
