@@ -59,7 +59,7 @@ export default function Chatroom() {
                                     <TableRow>
                                         <TableCell className="font-medium">{drawing.id}</TableCell>
                                         <TableCell>{drawing.user_id}</TableCell>
-                                        <TableCell>{drawing.image}</TableCell>
+                                        <TableCell><img src = {`/storage/drawing/${drawing.image}`} alt = {`Drawing ${drawing.id}`} className = 'h-20 w-20 object-contain'/></TableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>
